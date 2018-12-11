@@ -104,7 +104,10 @@ public abstract class MDStrategy implements Strategy
 		int n = getNumStates();
 		out.println("# Format explanation: module1:var1=[low1,high1]:type1;module2:var2=[low2,high2]:type2;...;");
 		for (int v = 0; v < varList.getNumVars(); v++) {
-			out.print(varList.getModule(v) + "_"+ moduleNames[varList.getModule(v)] + ":"
+			int moduleIndex = varList.getModule(v);
+			String moduleName = (moduleIndex>=0 && moduleIndex<moduleNames.length)
+					?moduleNames[moduleIndex]:"X";
+			out.print(moduleIndex + "_" + moduleName + ":"
 					+ varList.getName(v) + "=[" + varList.getLow(v) + "," + varList.getHigh(v) + "]" + ":"
 					+ varList.getType(v) + ";");
 		}
