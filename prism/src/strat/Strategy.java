@@ -27,6 +27,9 @@
 
 package strat;
 
+import java.util.List;
+import parser.State;
+import parser.VarList;
 import prism.PrismLog;
 
 /**
@@ -43,6 +46,11 @@ public interface Strategy
 	 * Export the strategy to a PrismLog, displaying strategy choices as action names.
 	 */
 	public void exportActions(PrismLog out);
+
+	/**
+	 * Export the strategy to a PrismLog, displaying strategy choices as action names.
+	 */
+	public void exportActionsExplicit(PrismLog out, VarList varList, List<State> stateList);
 	
 	/**
 	 * Export the strategy to a PrismLog, displaying strategy choices as indices.

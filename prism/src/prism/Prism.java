@@ -3313,7 +3313,9 @@ public class Prism extends PrismComponent implements PrismSettingsListener
 		tmpLog = getPrismLogForFile(file);
 		switch (exportType) {
 		case ACTIONS:
-			strat.exportActions(tmpLog);
+			// strat.exportActions(tmpLog);
+			// TODO: Add a new switch for this
+			strat.exportActionsExplicit(tmpLog, currentModelExpl.getVarList(), currentModelExpl.getStatesList());
 			break;
 		case INDICES:
 			strat.exportIndices(tmpLog);

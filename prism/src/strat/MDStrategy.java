@@ -27,6 +27,9 @@
 
 package strat;
 
+import java.util.List;
+import parser.State;
+import parser.VarList;
 import prism.PrismLog;
 
 /**
@@ -93,6 +96,22 @@ public abstract class MDStrategy implements Strategy
 		for (int s = 0; s < n; s++) {
 			if (isChoiceDefined(s))
 				out.println(s + ":" + getChoiceAction(s));
+		}
+	}
+
+	@Override
+	public void exportActionsExplicit(PrismLog out, VarList varList, List<State> stateList) {
+		int n = getNumStates();
+		out.println("# Format explanation: module1:var1=[low1,high1]:type1;module2:var2=[low2,high2]:type2;...;");
+		for (int v = 0; v < varList.getNumVars(); v++) {
+			out.print(varList.getModule(v) + ":"
+					+ varList.getName(v) + "=[" + varList.getLow(v) + "," + varList.getHigh(v) + "]" + ":"
+					+ varList.getType(v) + ";");
+		}
+		out.println("");
+		for (int s = 0; s < n; s++) {
+			if (isChoiceDefined(s))
+				out.println(stateList.get(s) + ":" + getChoiceAction(s));
 		}
 	}
 
