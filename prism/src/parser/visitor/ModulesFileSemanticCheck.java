@@ -1,27 +1,27 @@
 //==============================================================================
-//	
+//
 //	Copyright (c) 2002-
 //	Authors:
 //	* Dave Parker <d.a.parker@cs.bham.ac.uk> (University of Birmingham/Oxford)
-//	
+//
 //------------------------------------------------------------------------------
-//	
+//
 //	This file is part of PRISM.
-//	
+//
 //	PRISM is free software; you can redistribute it and/or modify
 //	it under the terms of the GNU General Public License as published by
 //	the Free Software Foundation; either version 2 of the License, or
 //	(at your option) any later version.
-//	
+//
 //	PRISM is distributed in the hope that it will be useful,
 //	but WITHOUT ANY WARRANTY; without even the implied warranty of
 //	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //	GNU General Public License for more details.
-//	
+//
 //	You should have received a copy of the GNU General Public License
 //	along with PRISM; if not, write to the Free Software Foundation,
 //	Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-//	
+//
 //==============================================================================
 
 package parser.visitor;
@@ -99,7 +99,7 @@ public class ModulesFileSemanticCheck extends SemanticCheck
 			throw new PrismLangException("Reference to system " + e.getName() + " which does not exist", e);
 		return null;
 	}
-	
+
 	public Object visit(FormulaList e) throws PrismLangException
 	{
 		// Override - don't need to do any semantic checks on formulas
@@ -107,7 +107,7 @@ public class ModulesFileSemanticCheck extends SemanticCheck
 		// (and we shouldn't check them - e.g. clock vars appearing in errors would show as an error)
 		return null;
 	}
-	
+
 	public void visitPost(LabelList e) throws PrismLangException
 	{
 		int i, n;
@@ -218,7 +218,7 @@ public class ModulesFileSemanticCheck extends SemanticCheck
 		visitPost(e);
 		return null;
 	}
-	
+
 	public void visitPre(Update e) throws PrismLangException
 	{
 		// Register the fact we are entering an update
@@ -250,7 +250,7 @@ public class ModulesFileSemanticCheck extends SemanticCheck
 				s = "Module \"" + m.getName() + "\" is not allowed to modify variable \"" + var + "\"";
 				throw new PrismLangException(s, e.getVarIdent(i));
 			}
-			if (isGlobal && !c.getSynch().equals("")) {
+			if (isGlobal && !c.getSynch().equals("") && !c.getSynch().startsWith("async_")) {
 				s = "Synchronous command cannot modify global variable";
 				throw new PrismLangException(s, e.getVarIdent(i));
 			}
