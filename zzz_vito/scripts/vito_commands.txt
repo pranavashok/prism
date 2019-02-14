@@ -1,0 +1,16 @@
+
+from folder PrismPranav/prism/prism
+
+make
+
+to build
+
+///
+
+from folder PrismPranav/prism
+
+prism/bin/prism prism-examples/csma/csma2_2.nm prism-examples/csma/csma.pctl -const k=4 -prop 9 -explicit -politer -exportstrat zzz_strategies/strategy_csma2_2_k4_p9.txt:type=actions
+binary          model                          spec, its const(s), which prop in spec file      switches for strategy dump to work, file folder/name
+
+to get a strategy
+
