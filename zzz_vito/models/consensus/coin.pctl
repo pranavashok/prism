@@ -1,5 +1,12 @@
 const int k;
 
+// VITO
+// all processes finish
+P>=1 [ F "finished" ]
+// all processes finish with coins all equal (P>=1 never works)
+Pmax=? [ F "finished"&"agree" ]
+
+
 // C1 (with probability 1, all N processes finish the protocol)
 P>=1 [ F "finished" ]
 

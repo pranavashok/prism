@@ -6,8 +6,8 @@ from threading import Timer
 
 # Timed-out flag
 TIMED_OUT = False
-# Timeout in seconds (5 minutes)
-TIMEOUT = 5*60
+# Timeout in seconds (10 minutes)
+TIMEOUT = 10*60
 
 
 # Kills the process p if a timeout occurred - sets the flag TIMED_OUT
@@ -48,17 +48,20 @@ def parse_output(output):
 ######
 
 # MODEL
-PROCESSES = [2, 3, 4] # 2 3 4
-BACKOFF   = [2, 4, 6] # 2 4 6
+PROCESSES = [2, 3, 4] # 2, 3, 4
+BACKOFF   = [2, 4, 6] # 2, 4, 6
 # SPEC
-K         = [1, 2, 3, 4, 5, 6] # 1 2 3 4 5 6
-P         = ['06', '08', '09'] # 01 02 03 04 05 06 07 08 09 10
-# 06) message of some station eventually delivered before k backoffs
-# Pmax=?[ F min_backoff_after_success<=k ] --- we need 1 (almost-sure)
-# 08) probability all sent successfully before a collision with max backoff
-# Pmax=?[ !"collision_max_backoff" U "all_delivered" ] --- we need 1 (almost-sure)
-# 09) probability some station suffers at least k collisions
-# Pmin=?[ F max_collisions>=k ] --- we need 0 (almost-sure)
+K         = [1, 2, 3, 4, 5, 6] # 1, 2, 3, 4, 5, 6
+P         = [1, 2, 3, 4, 5, 6]
+# all sent successfully before a collision with max backoff
+#  1) P>=1 [ !"collision_max_backoff" U "all_delivered" ]
+#  2) Pmax=? [ !"collision_max_backoff" U "all_delivered" ]
+# message of some station eventually delivered before k backoffs
+#  3) P>=1 [ F min_backoff_after_success<=k ]
+#  4) Pmax=? [ F min_backoff_after_success<=k ]
+# some station suffers at least k collisions
+#  5) P<=0 [ F max_collisions>=k ]
+#  6) Pmin=? [ F max_collisions>=k ]
 
 REPORTS_DIR = '../reports'
 REPORT_FILE = os.path.join(REPORTS_DIR, 'report_csma.txt')
@@ -76,11 +79,14 @@ def run_all():
     for bai in BACKOFF:
       for pi in P:
         for ki in K:
-          if pi == '08' and ki > 1:
-            # 08) does not depend on k
+          if pi <= 2 and ki > 1:
+            # 1)2) do not depend on k
             continue
-          if pri == 4 and bai >= 4:
-            # model was not constructed within 5 min
+          if TIMED_OUT and (pi > 1 or ki > 1):
+            # timed out during lower p / k
+            continue
+          if (pri >= 3 and bai >= 6) or (pri >= 4 and bai >= 4):
+            # model was not constructed within 10 min
             continue
 
           str_name = ('csma%d_%d__p%s_k%d' %
@@ -94,8 +100,8 @@ def run_all():
                            '../models/csma/csma%d_%d.nm' % (pri, bai),
                            '../models/csma/csma.pctl',
                            '-const k=%d' % ki,
-                           '-prop %s' % pi,
-                           '-explicit -politer',
+                           '-prop %d' % pi,
+                           '-explicit', # -politer
                            '-exportstrat %s:type=actions' % str_full_path]
           command = ' '.join(command_parts)
           stdout, stderr, exit_code = run(command)

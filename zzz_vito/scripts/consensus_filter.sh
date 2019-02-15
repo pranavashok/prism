@@ -1,6 +1,6 @@
 #!/bin/bash
 
-STRDIR=../strategies/csma
+STRDIR=../strategies/consensus
 SMALLDIR=$STRDIR/filteredSmall
 BADVALUEDIR=$STRDIR/filteredBadvalue
 
@@ -23,19 +23,11 @@ for filename in $STRDIR/*.prism; do
   if grep -q "Value in the initial state" "$filename"; then
     initval=$(grep 'Value in the initial state' $filename | cut -d: -f2)
 
-    #  2) Pmax=? [ !"collision_max_backoff" U "all_delivered" ]
-    #  4) Pmax=? [ F min_backoff_after_success<=k ]
-    if [[ $base == *"p2"* || $base == *"p4"* ]]; then
+    #  3) Pmax=? [ F "finished"&"agree" ]
+    #  5) Pmax=? [ F<=k "finished" ]
+    if [[ $base == *"p3"* || $base == *"p5"* ]]; then
       if (( $(echo "$initval < 0.999" |bc -l) )); then
         echo "$BADVALUEDIR/$base    need: 1.0  has val:$initval"
-        mv $filename $BADVALUEDIR
-      fi
-    fi
-
-    #  6) Pmin=? [ F max_collisions>=k ]
-    if [[ $base == *"p6"* ]]; then
-      if (( $(echo "$initval > 0.001" |bc -l) )); then
-        echo "$BADVALUEDIR/$base    need: 0.0  has val:$initval"
         mv $filename $BADVALUEDIR
       fi
     fi

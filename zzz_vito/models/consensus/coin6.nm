@@ -1,4 +1,4 @@
-// COIN FLIPPING PROTOCOL FOR POLYNOMIAL RANDOMIZED CONSENSUS [AH90] 
+// COIN FLIPPING PROTOCOL FOR POLYNOMIAL RANDOMIZED CONSENSUS [AH90]
 // gxn/dxp 20/11/00
 
 mdp
@@ -15,41 +15,41 @@ const int right = 2*(K+1)*N - N;
 global counter : [0..range] init counter_init;
 
 module process1
-	
+
 	// program counter
 	pc1 : [0..3];
 	// 0 - flip
-	// 1 - write 
+	// 1 - write
 	// 2 - check
 	// 3 - finished
-	
+
 	// local coin
-	coin1 : [0..1];	
+	coin1 : [0..1];
 
 	// flip coin
-	[] (pc1=0)  -> 0.5 : (coin1'=0) & (pc1'=1) + 0.5 : (coin1'=1) & (pc1'=1);
+	[flip1] (pc1=0)  -> 0.5 : (coin1'=0) & (pc1'=1) + 0.5 : (coin1'=1) & (pc1'=1);
 	// write tails -1  (reset coin to add regularity)
-	[] (pc1=1) & (coin1=0) & (counter>0) -> (counter'=counter-1) & (pc1'=2) & (coin1'=0);
+	[async_write_tails1] (pc1=1) & (coin1=0) & (counter>0) -> (counter'=counter-1) & (pc1'=2) & (coin1'=0);
 	// write heads +1 (reset coin to add regularity)
-	[] (pc1=1) & (coin1=1) & (counter<range) -> (counter'=counter+1) & (pc1'=2) & (coin1'=0);
+	[async_write_heads1] (pc1=1) & (coin1=1) & (counter<range) -> (counter'=counter+1) & (pc1'=2) & (coin1'=0);
 	// check
 	// decide tails
-	[] (pc1=2) & (counter<=left) -> (pc1'=3) & (coin1'=0);
+	[decide_tails1] (pc1=2) & (counter<=left) -> (pc1'=3) & (coin1'=0);
 	// decide heads
-	[] (pc1=2) & (counter>=right) -> (pc1'=3) & (coin1'=1);
+	[decide_heads1] (pc1=2) & (counter>=right) -> (pc1'=3) & (coin1'=1);
 	// flip again
-	[] (pc1=2) & (counter>left) & (counter<right) -> (pc1'=0);
+	[flip_again1] (pc1=2) & (counter>left) & (counter<right) -> (pc1'=0);
 	// loop (all loop together when done)
 	[done] (pc1=3) -> (pc1'=3);
 
 endmodule
 
 // construct remaining processes through renaming
-module process2 = process1[pc1=pc2,coin1=coin2] endmodule
-module process3 = process1[pc1=pc3,coin1=coin3] endmodule
-module process4 = process1[pc1=pc4,coin1=coin4] endmodule
-module process5 = process1[pc1=pc5,coin1=coin5] endmodule
-module process6 = process1[pc1=pc6,coin1=coin6] endmodule
+module process2 = process1[pc1=pc2,coin1=coin2,flip1=flip2,async_write_tails1=async_write_tails2,async_write_heads1=async_write_heads2,decide_tails1=decide_tails2,decide_heads1=decide_heads2,flip_again1=flip_again2] endmodule
+module process3 = process1[pc1=pc3,coin1=coin3,flip1=flip3,async_write_tails1=async_write_tails3,async_write_heads1=async_write_heads3,decide_tails1=decide_tails3,decide_heads1=decide_heads3,flip_again1=flip_again3] endmodule
+module process4 = process1[pc1=pc4,coin1=coin4,flip1=flip4,async_write_tails1=async_write_tails4,async_write_heads1=async_write_heads4,decide_tails1=decide_tails4,decide_heads1=decide_heads4,flip_again1=flip_again4] endmodule
+module process5 = process1[pc1=pc5,coin1=coin5,flip1=flip5,async_write_tails1=async_write_tails5,async_write_heads1=async_write_heads5,decide_tails1=decide_tails5,decide_heads1=decide_heads5,flip_again1=flip_again5] endmodule
+module process6 = process1[pc1=pc6,coin1=coin6,flip1=flip6,async_write_tails1=async_write_tails6,async_write_heads1=async_write_heads6,decide_tails1=decide_tails6,decide_heads1=decide_heads6,flip_again1=flip_again6] endmodule
 
 // labels
 label "finished" = pc1=3 & pc2=3 & pc3=3 & pc4=3 & pc5=3 & pc6=3 ;
