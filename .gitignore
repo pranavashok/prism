@@ -1,3 +1,7 @@
+# zzz_vito files
+zzz_vito/strategies/**/*.prism
+zzz_vito/reports/*.txt
+
 # general patterns to ignore
 # Emacs backup files
 *~

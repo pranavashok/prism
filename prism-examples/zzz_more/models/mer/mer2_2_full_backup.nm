@@ -1,0 +1,170 @@
+mdp
+
+const double p=0.2;
+const int n;
+
+module arbiter
+
+	s:[-1..2] init 0; // arbiter state
+	r:[0..2] init 0; // rescind user
+	k:[0..n] init 0;
+
+	commUser:[0..2] init 0;
+	driveUser:[0..2] init 0;
+
+	gc: bool init false; // grant comm
+	dc: bool init false; //deny comm
+	gd: bool init false; // grant drive
+	dd: bool init false; //deny drive	
+
+	// request comm
+	[u1_request_comm] s=0 & commUser=0 & driveUser=0 -> (s'=1) & (gc'=true);
+	[u1_request_comm] s=0 & commUser!=0 -> (s'=1) & (dc'=true);
+	[u1_request_comm] s=0 & commUser=0 & driveUser!=0-> (1-p):(s'=1) & (r'=driveUser) + p:(s'=-1) & (gc'=true);
+	[u1_request_comm] s=0 & commUser=0 & driveUser!=0 & k=n -> (s'=1) & (r'=driveUser);
+	[u1_grant_comm] s=1 & commUser=0 & driveUser=0 & gc & !gd -> (s'=0) & (commUser'=1) & (gc'=false);
+	[u1_grant_comm] s=-1 & gc -> (s'=0) & (commUser'=1) & (gc'=false); // error behavior
+	[u1_deny_comm] s=1 & dc -> (s'=0) & (dc'=false);
+	[] s=1 -> true;
+
+	[u2_request_comm] s=0 & commUser=0 & driveUser=0 -> (s'=2) & (gc'=true);
+	[u2_request_comm] s=0 & commUser!=0 -> (s'=2) & (dc'=true);
+	[u2_request_comm] s=0 & commUser=0 & driveUser!=0 -> (s'=2) & (r'=driveUser);
+	[u2_grant_comm] s=2 & commUser=0 & driveUser=0 & gc & !gd -> (s'=0) & (commUser'=2) & (gc'=false);
+	[u2_deny_comm] s=2 & dc -> (s'=0) & (dc'=false);
+	[] s=2 -> true;
+
+
+	// rescind drive
+	[u1_rescind_drive] r=1 & driveUser=1 -> (r'=0) & (gc'=true);
+	[u2_rescind_drive] r=2 & driveUser=2 -> (r'=0) & (gc'=true);
+	[] r!=0 & driveUser=0 -> (r'=0) & (gc'=true);
+	
+	// request drive
+	[u1_request_drive] s=0 & commUser=0 & driveUser=0 -> (s'=1) & (gd'=true);
+	[u1_grant_drive] s=1 & driveUser=0 & gd -> (s'=0) & (driveUser'=1) & (gd'=false);
+	[u1_request_drive] s=0 & (commUser!=0 | driveUser!=0) -> (s'=1) & (dd'=true);
+	[u1_deny_drive] s=1 & dd -> (s'=0) & (dd'=false);
+
+	[u2_request_drive] s=0 & commUser=0 & driveUser=0 -> (s'=2) & (gd'=true);
+	[u2_grant_drive] s=2 & driveUser=0 & gd -> (s'=0) & (driveUser'=2) & (gd'=false);
+	[u2_request_drive] s=0 & (commUser!=0 | driveUser!=0) -> (s'=2) & (dd'=true);
+	[u2_deny_drive] s=2 & dd -> (s'=0) & (dd'=false);
+
+
+	// cancel comm
+	[u1_cancel_comm] commUser=1 -> (commUser'=0);
+	[u2_cancel_comm] commUser=2 -> (commUser'=0);
+
+	// cancel drive
+	[u1_cancel_drive] driveUser=1 -> (driveUser'=0);
+	[u2_cancel_drive] driveUser=2 -> (driveUser'=0);
+
+endmodule
+//const double q; // probability of choosing resources
+const double x=0.5;
+module user1
+	
+	s1:[0..4] init 0; 
+	// 0: Idle
+	// 1: Init
+	// 2: PendingReservation
+	// 3: Granted
+	// 4: PendingCancel
+
+	r1:[0..2] init 0; // resources
+	// 1: Communication (Comm)
+	// 2: Drive
+
+	rescind1: bool init false;
+ 
+	// Idle -> Init
+	[] s1=0 & r1=0 -> (r1'=1);
+ 	[] s1=0 & r1=0 -> (r1'=2);
+
+	[] s1=0 & r1=1 -> (s1'=1);
+ 	[] s1=0 & r1=2 -> (s1'=1);
+
+	// Init -> PendingReservation
+	[u1_request_comm] s1=1 & r1=1 -> (s1'=2);
+	[u1_request_drive] s1=1 & r1=2 -> (s1'=2);
+
+	// PendingReservation -> Granted
+	[u1_grant_comm] s1=2 & r1=1 -> (s1'=3);
+	[u1_grant_drive] s1=2 & r1=2 -> (s1'=3);
+
+	// PendingReservation -> Init
+	[u1_deny_comm] s1=2 & r1=1 -> (s1'=1);
+	[u1_deny_drive] s1=2 & r1=2 -> (s1'=1);
+
+	// cancel request
+	[u1_cancel_comm] s1=2 & r1=1 -> (s1'=0) & (r1'=0);
+	[u1_cancel_drive] s1=2 & r1=2 -> (s1'=0) & (r1'=0);
+
+	// Granted -> Init
+	[u1_rescind_drive] s1=3 & r1=2 -> (rescind1'=true);
+	[u1_cancel_drive] s1=3 & r1=2 & rescind1 -> (s1'=1) & (rescind1'=false);
+
+	// Granted -> PendingCancel
+	[] s1=3 & r1=1 -> x:(s1'=4)+(1-x):(s1'=0) & (r1'=0);
+	[] s1=3 & r1=2 & !rescind1 -> x:(s1'=4)+(1-x):(s1'=0) & (r1'=0);
+
+	// PendingCancel -> Idle(nondet)
+	[u1_cancel_comm] s1=4 & r1=1 -> (s1'=0) & (r1'=0);
+	[u1_cancel_drive] s1=4 & r1=2 -> (s1'=0) & (r1'=0);
+
+endmodule
+
+module user2 = user1 [s1=s2, r1=r2, rescind1=rescind2, u1_request_comm=u2_request_comm, u1_request_drive=u2_request_drive, 
+		      u1_grant_comm=u2_grant_comm, u1_grant_drive=u2_grant_drive, u1_deny_comm=u2_deny_comm, 
+		      u1_deny_drive=u2_deny_drive, u1_rescind_drive=u2_rescind_drive,
+		      u1_cancel_comm=u2_cancel_comm, u1_cancel_drive=u2_cancel_drive]
+endmodule
+
+label "err_G" = e=3;
+module property
+
+	e:[0..3] init 0;
+	u:[0..2] init 0;
+
+	[u1_grant_comm] e=0 -> (e'=1) & (u'=1);
+	[u1_grant_drive] e=0 -> (e'=2) & (u'=1);
+	[u1_cancel_comm] e=0 -> true;
+	[u1_cancel_drive] e=0 -> true;
+	[u2_grant_comm] e=0 -> (e'=1) & (u'=2);
+	[u2_grant_drive] e=0 -> (e'=2) & (u'=2);
+	[u2_cancel_comm] e=0 -> true;
+	[u2_cancel_drive] e=0 -> true;
+
+	[u1_cancel_comm] e=1 & u=1 -> (e'=0);
+	[u1_grant_drive] e=1 -> (e'=3);
+	[u1_cancel_drive] e=1 -> true;
+	[u1_grant_comm] e=1 -> true;
+	[u2_cancel_comm] e=1 & u=2 -> (e'=0);
+	[u2_grant_drive] e=1 -> (e'=3);
+	[u2_cancel_drive] e=1 -> true;
+	[u2_grant_comm] e=1 -> true;
+
+	[u1_cancel_drive] e=2 & u=1 -> (e'=0);
+	[u1_grant_comm] e=2 -> (e'=3);
+	[u1_cancel_comm] e=2 -> true;
+	[u1_grant_drive] e=2 -> true;
+	[u2_cancel_drive] e=2 & u=2 -> (e'=0);
+	[u2_grant_comm] e=2 -> (e'=3);
+	[u2_cancel_comm] e=2 -> true;
+	[u2_grant_drive] e=2 -> true;
+
+	[u1_grant_comm] e=3 -> true;
+	[u1_grant_drive] e=3 -> true;
+	[u1_cancel_comm] e=3 -> true;
+	[u1_cancel_drive] e=3 -> true;
+	[u2_grant_comm] e=3 -> true;
+	[u2_grant_drive] e=3 -> true;
+	[u2_cancel_comm] e=3 -> true;
+	[u2_cancel_drive] e=3 -> true;
+
+endmodule
+// Dummy module to get PA semantics
+module loops
+	[] true -> true;
+endmodule

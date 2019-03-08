@@ -1,0 +1,4 @@
+
+In models/ only 'mer' new, others already in prism
+
+in scripts/ how they executed their experiments, can serve as inspiration

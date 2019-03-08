@@ -1,0 +1,3 @@
+// time bound property
+Pmax=? [ F ((s1=8)&(s2=7))|((s1=7)&(s2=8)) ]
+
