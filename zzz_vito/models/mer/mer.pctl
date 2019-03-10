@@ -1,0 +1,7 @@
+// VITO
+Pmax=? [F "err_G"]
+Pmin=? [F "err_G"]
+
+const int K;
+Pmax=?[F "err_G"]
+Pmax=?[F<=K "err_G"]
