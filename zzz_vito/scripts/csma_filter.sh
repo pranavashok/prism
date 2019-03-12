@@ -11,7 +11,7 @@ mkdir -p $BADVALUEDIR
 for filename in $STRDIR/*.prism; do
   base=$(basename $filename)
   file_size_kb=`du -k "$filename" | cut -f1`
-  if (( $(echo "$file_size_kb < 10" |bc -l) )); then
+  if (( $(echo "$file_size_kb < 5" |bc -l) )); then
     echo "$SMALLDIR/$base"
     mv $filename $SMALLDIR
   fi
@@ -23,19 +23,11 @@ for filename in $STRDIR/*.prism; do
   if grep -q "Value in the initial state" "$filename"; then
     initval=$(grep 'Value in the initial state' $filename | cut -d: -f2)
 
-    #  2) Pmax=? [ !"collision_max_backoff" U "all_delivered" ]
-    #  4) Pmax=? [ F min_backoff_after_success<=k ]
-    if [[ $base == *"p2"* || $base == *"p4"* ]]; then
+    #  1) Pmax=? [ !"collision_max_backoff" U "all_delivered" ]
+    #  2) Pmax=? [ F min_backoff_after_success<=k ]
+    if [[ $base == *"p1"* || $base == *"p2"* ]]; then
       if (( $(echo "$initval < 0.999" |bc -l) )); then
         echo "$BADVALUEDIR/$base    need: 1.0  has val:$initval"
-        mv $filename $BADVALUEDIR
-      fi
-    fi
-
-    #  6) Pmin=? [ F max_collisions>=k ]
-    if [[ $base == *"p6"* ]]; then
-      if (( $(echo "$initval > 0.001" |bc -l) )); then
-        echo "$BADVALUEDIR/$base    need: 0.0  has val:$initval"
         mv $filename $BADVALUEDIR
       fi
     fi
@@ -46,3 +38,11 @@ for filename in $STRDIR/*.prism; do
   fi
 
 done
+
+#    #  6) Pmin=? [ F max_collisions>=k ]
+#    if [[ $base == *"p6"* ]]; then
+#      if (( $(echo "$initval > 0.001" |bc -l) )); then
+#        echo "$BADVALUEDIR/$base    need: 0.0  has val:$initval"
+#        mv $filename $BADVALUEDIR
+#      fi
+#    fi

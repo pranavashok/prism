@@ -34,7 +34,7 @@ def check_duplicates():
     print(file_name)
     file_full_path = os.path.join(STRAT_DIR, file_name)
     new_p = file_name.split('_')[-2]
-    if new_p != current_p and int(new_p[1:]) % 2 == 1: # Even is the max/min version of same-but-P1/P0 objective
+    if new_p != current_p: # and int(new_p[1:]) % 2 == 1: # Even is the max/min version of same-but-P1/P0 objective
       print('"%s" is different from "%s"' % (new_p, current_p))
       current_p = new_p
       current_file_name = file_name

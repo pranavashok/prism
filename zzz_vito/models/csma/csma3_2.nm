@@ -94,8 +94,8 @@ module station1
 
 	// set backoff (no time can pass in this state)
 	// probability depends on which transmission this is (cd1)
-	[backoff1] s1=2 & cd1=1 ->  1/2 : (s1'=3) & (bc1'=0) + 1/2 : (s1'=3) & (bc1'=1) ;
-	[backoff1] s1=2 & cd1=2 ->  1/4 : (s1'=3) & (bc1'=0) + 1/4 : (s1'=3) & (bc1'=1) + 1/4 : (s1'=3) & (bc1'=2) + 1/4 : (s1'=3) & (bc1'=3) ;
+	[async_backoff_station1] s1=2 & cd1=1 ->  1/2 : (s1'=3) & (bc1'=0) + 1/2 : (s1'=3) & (bc1'=1) ;
+	[async_backoff_station1] s1=2 & cd1=2 ->  1/4 : (s1'=3) & (bc1'=0) + 1/4 : (s1'=3) & (bc1'=1) + 1/4 : (s1'=3) & (bc1'=2) + 1/4 : (s1'=3) & (bc1'=3) ;
 
 	// wait until backoff counter reaches 0 then send again
 	[time] (s1=3) & (x1<slot) -> (x1'=x1+1); // let time pass (in slot)
@@ -111,8 +111,11 @@ endmodule
 //----------------------------------------------------------------------------------------------------------------------------
 
 // construct further stations through renaming
-module station2=station1[s1=s2,x1=x2,cd1=cd2,bc1=bc2,send1=send2,busy1=busy2,end1=end2,backoff1=backoff2] endmodule
-module station3=station1[s1=s3,x1=x3,cd1=cd3,bc1=bc3,send1=send3,busy1=busy3,end1=end3,backoff1=backoff3] endmodule
+module station2=station1[s1=s2,x1=x2,cd1=cd2,bc1=bc2,send1=send2,busy1=busy2,end1=end2,
+                         async_backoff_station1=async_backoff_station2] endmodule
+
+module station3=station1[s1=s3,x1=x3,cd1=cd3,bc1=bc3,send1=send3,busy1=busy3,end1=end3,
+                         async_backoff_station1=async_backoff_station3] endmodule
 
 //----------------------------------------------------------------------------------------------------------------------------
 

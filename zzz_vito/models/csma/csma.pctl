@@ -1,11 +1,9 @@
 const int k;
 
 // VITO
-// all sent successfully before a collision with max backoff
-P>=1 [ !"collision_max_backoff" U "all_delivered" ]
+// all sent successfully before a collision with max backoff (P>=1 never works)
 Pmax=? [ !"collision_max_backoff" U "all_delivered" ]
-// message of some station eventually delivered before k backoffs
-P>=1 [ F min_backoff_after_success<=k ]
+// message of some station eventually delivered before k backoffs (P>=1 never works)
 Pmax=? [ F min_backoff_after_success<=k ]
 // some station suffers at least k collisions
 P<=0 [ F max_collisions>=k ]
