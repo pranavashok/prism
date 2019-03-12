@@ -25,20 +25,20 @@ module arbiter
 	[u1_grant_comm] s=1 & commUser=0 & driveUser=0 & gc & !gd -> (s'=0) & (commUser'=1) & (gc'=false);
 	[u1_grant_comm] s=-1 & gc -> (s'=0) & (commUser'=1) & (gc'=false); // error behavior
 	[u1_deny_comm] s=1 & dc -> (s'=0) & (dc'=false);
-	[async_commwait] s=1 -> true;
+	[commwait] s=1 -> true; // async without prefix
 
 	[u2_request_comm] s=0 & commUser=0 & driveUser=0 -> (s'=2) & (gc'=true);
 	[u2_request_comm] s=0 & commUser!=0 -> (s'=2) & (dc'=true);
 	[u2_request_comm] s=0 & commUser=0 & driveUser!=0 -> (s'=2) & (r'=driveUser);
 	[u2_grant_comm] s=2 & commUser=0 & driveUser=0 & gc & !gd -> (s'=0) & (commUser'=2) & (gc'=false);
 	[u2_deny_comm] s=2 & dc -> (s'=0) & (dc'=false);
-	[async_commwait] s=2 -> true;
+	[commwait] s=2 -> true; // async without prefix
 
 
 	// rescind drive
 	[u1_rescind_drive] r=1 & driveUser=1 -> (r'=0) & (gc'=true);
 	[u2_rescind_drive] r=2 & driveUser=2 -> (r'=0) & (gc'=true);
-	[async_u0_drive] r!=0 & driveUser=0 -> (r'=0) & (gc'=true);
+	[no_rescind_drive] r!=0 & driveUser=0 -> (r'=0) & (gc'=true); // async without prefix
 
 	// request drive
 	[u1_request_drive] s=0 & commUser=0 & driveUser=0 -> (s'=1) & (gd'=true);
@@ -79,11 +79,11 @@ module user1
 	rescind1: bool init false;
 
 	// Idle -> Init
-	[async_u1_init1] s1=0 & r1=0 -> (r1'=1);
- 	[async_u1_init2] s1=0 & r1=0 -> (r1'=2);
+	[async_init1_user1] s1=0 & r1=0 -> (r1'=1);
+ 	[async_init2_user1] s1=0 & r1=0 -> (r1'=2);
 
-	[async_u1_inits] s1=0 & r1=1 -> (s1'=1);
- 	[async_u1_inits] s1=0 & r1=2 -> (s1'=1);
+	[async_inits_user1] s1=0 & r1=1 -> (s1'=1);
+ 	[async_inits_user1] s1=0 & r1=2 -> (s1'=1);
 
 	// Init -> PendingReservation
 	[u1_request_comm] s1=1 & r1=1 -> (s1'=2);
@@ -106,8 +106,8 @@ module user1
 	[u1_cancel_drive] s1=3 & r1=2 & rescind1 -> (s1'=1) & (rescind1'=false);
 
 	// Granted -> PendingCancel
-	[async_u1_pendcancel] s1=3 & r1=1 -> x:(s1'=4)+(1-x):(s1'=0) & (r1'=0);
-	[async_u1_pendcancel] s1=3 & r1=2 & !rescind1 -> x:(s1'=4)+(1-x):(s1'=0) & (r1'=0);
+	[async_pendcancel_user1] s1=3 & r1=1 -> x:(s1'=4)+(1-x):(s1'=0) & (r1'=0);
+	[async_pendcancel_user1] s1=3 & r1=2 & !rescind1 -> x:(s1'=4)+(1-x):(s1'=0) & (r1'=0);
 
 	// PendingCancel -> Idle(nondet)
 	[u1_cancel_comm] s1=4 & r1=1 -> (s1'=0) & (r1'=0);
@@ -119,9 +119,10 @@ module user2 = user1 [s1=s2, r1=r2, rescind1=rescind2, u1_request_comm=u2_reques
 		      u1_grant_comm=u2_grant_comm, u1_grant_drive=u2_grant_drive, u1_deny_comm=u2_deny_comm,
 		      u1_deny_drive=u2_deny_drive, u1_rescind_drive=u2_rescind_drive,
 		      u1_cancel_comm=u2_cancel_comm, u1_cancel_drive=u2_cancel_drive,
-          async_u1_init1=async_u2_init1,async_u1_init2=async_u2_init2,
-          async_u1_inits=async_u2_inits,
-          async_u1_pendcancel=async_u2_pendcancel]
+          async_init1_user1=async_init1_user2,
+          async_init2_user1=async_init2_user2,
+          async_inits_user1=async_inits_user2,
+          async_pendcancel_user1=async_pendcancel_user2]
 endmodule
 
 label "err_G" = e=3;
@@ -169,5 +170,5 @@ module property
 endmodule
 // Dummy module to get PA semantics
 module loops
-	[async_loop] true -> true;
+	[loop] true -> true; // async without prefix
 endmodule
