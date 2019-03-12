@@ -48,7 +48,7 @@ def parse_output(output):
 ######
 
 # MODEL
-COIN   = [2, 4, 6, 8] # 2, 4, 6, 8
+COIN   = [2, 3, 4, 5] # 2, 4, 6, 8
 CAPK   = [0, 1, 2, 3, 4, 9] # 0, 1, 2, 3, 4, 9
 # SPEC
 P      = [1, 2]
@@ -75,9 +75,9 @@ def run_all():
         if TIMED_OUT and pi > 1:
           # timed out during lower p
           continue
-        if ci >= 8 or (ci >= 6 and capki >= 4):
+        #if ci >= 8 or (ci >= 6 and capki >= 4):
           # not finished within 10 min
-          continue
+          #continue
 
         str_name = ('coin%d_K%d__p%s' %
                     (ci, capki, pi))

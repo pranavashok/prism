@@ -27,27 +27,45 @@ module process1
 	coin1 : [0..1];
 
 	// flip coin
-	[flip1] (pc1=0)  -> 0.5 : (coin1'=0) & (pc1'=1) + 0.5 : (coin1'=1) & (pc1'=1);
+	[async_flip_process1] (pc1=0)  -> 0.5 : (coin1'=0) & (pc1'=1) + 0.5 : (coin1'=1) & (pc1'=1);
 	// write tails -1  (reset coin to add regularity)
-	[async_write_tails1] (pc1=1) & (coin1=0) & (counter>0) -> (counter'=counter-1) & (pc1'=2) & (coin1'=0);
+	[async_write_tails_process1] (pc1=1) & (coin1=0) & (counter>0) -> (counter'=counter-1) & (pc1'=2) & (coin1'=0);
 	// write heads +1 (reset coin to add regularity)
-	[async_write_heads1] (pc1=1) & (coin1=1) & (counter<range) -> (counter'=counter+1) & (pc1'=2) & (coin1'=0);
+	[async_write_heads_process1] (pc1=1) & (coin1=1) & (counter<range) -> (counter'=counter+1) & (pc1'=2) & (coin1'=0);
 	// check
 	// decide tails
-	[decide_tails1] (pc1=2) & (counter<=left) -> (pc1'=3) & (coin1'=0);
+	[async_decide_tails_process1] (pc1=2) & (counter<=left) -> (pc1'=3) & (coin1'=0);
 	// decide heads
-	[decide_heads1] (pc1=2) & (counter>=right) -> (pc1'=3) & (coin1'=1);
+	[async_decide_heads_process1] (pc1=2) & (counter>=right) -> (pc1'=3) & (coin1'=1);
 	// flip again
-	[flip_again1] (pc1=2) & (counter>left) & (counter<right) -> (pc1'=0);
+	[async_flip_again_process1] (pc1=2) & (counter>left) & (counter<right) -> (pc1'=0);
 	// loop (all loop together when done)
 	[done] (pc1=3) -> (pc1'=3);
 
 endmodule
 
 // construct remaining processes through renaming
-module process2 = process1[pc1=pc2,coin1=coin2,flip1=flip2,async_write_tails1=async_write_tails2,async_write_heads1=async_write_heads2,decide_tails1=decide_tails2,decide_heads1=decide_heads2,flip_again1=flip_again2] endmodule
-module process3 = process1[pc1=pc3,coin1=coin3,flip1=flip3,async_write_tails1=async_write_tails3,async_write_heads1=async_write_heads3,decide_tails1=decide_tails3,decide_heads1=decide_heads3,flip_again1=flip_again3] endmodule
-module process4 = process1[pc1=pc4,coin1=coin4,flip1=flip4,async_write_tails1=async_write_tails4,async_write_heads1=async_write_heads4,decide_tails1=decide_tails4,decide_heads1=decide_heads4,flip_again1=flip_again4] endmodule
+module process2 = process1[pc1=pc2,coin1=coin2,
+async_flip_process1=async_flip_process2,
+async_write_tails_process1=async_write_tails_process2,
+async_write_heads_process1=async_write_heads_process2,
+async_decide_tails_process1=async_decide_tails_process2,
+async_decide_heads_process1=async_decide_heads_process2,
+async_flip_again_process1=async_flip_again_process2] endmodule
+module process3 = process1[pc1=pc3,coin1=coin3,
+async_flip_process1=async_flip_process3,
+async_write_tails_process1=async_write_tails_process3,
+async_write_heads_process1=async_write_heads_process3,
+async_decide_tails_process1=async_decide_tails_process3,
+async_decide_heads_process1=async_decide_heads_process3,
+async_flip_again_process1=async_flip_again_process3] endmodule
+module process4 = process1[pc1=pc4,coin1=coin4,
+async_flip_process1=async_flip_process4,
+async_write_tails_process1=async_write_tails_process4,
+async_write_heads_process1=async_write_heads_process4,
+async_decide_tails_process1=async_decide_tails_process4,
+async_decide_heads_process1=async_decide_heads_process4,
+async_flip_again_process1=async_flip_again_process4] endmodule
 
 // labels
 label "finished" = pc1=3 & pc2=3 & pc3=3 & pc4=3 ;

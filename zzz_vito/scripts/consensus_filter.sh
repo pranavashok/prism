@@ -11,7 +11,7 @@ mkdir -p $BADVALUEDIR
 for filename in $STRDIR/*.prism; do
   base=$(basename $filename)
   file_size_kb=`du -k "$filename" | cut -f1`
-  if (( $(echo "$file_size_kb < 10" |bc -l) )); then
+  if (( $(echo "$file_size_kb < 5" |bc -l) )); then
     echo "$SMALLDIR/$base"
     mv $filename $SMALLDIR
   fi
@@ -23,9 +23,8 @@ for filename in $STRDIR/*.prism; do
   if grep -q "Value in the initial state" "$filename"; then
     initval=$(grep 'Value in the initial state' $filename | cut -d: -f2)
 
-    #  3) Pmax=? [ F "finished"&"agree" ]
-    #  5) Pmax=? [ F<=k "finished" ]
-    if [[ $base == *"p3"* || $base == *"p5"* ]]; then
+    #  2) Pmax=? [ F "finished"&"agree" ]
+    if [[ $base == *"p2"* ]]; then
       if (( $(echo "$initval < 0.999" |bc -l) )); then
         echo "$BADVALUEDIR/$base    need: 1.0  has val:$initval"
         mv $filename $BADVALUEDIR
