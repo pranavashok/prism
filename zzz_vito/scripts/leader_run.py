@@ -48,7 +48,7 @@ def parse_output(output):
 ######
 
 # MODEL
-N = [3, 4, 5, 6, 7] # 3, 4, 5, 6, 7, 8, 9, 10
+N = [2, 3, 4, 5] # 2, 3, 4, 5, 6, 7, 8, 9, 10
 # SPEC
 P = [1, 2] # 1, 2, 3
 # only one leader is elected

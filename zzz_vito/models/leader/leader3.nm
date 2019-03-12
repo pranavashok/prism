@@ -34,7 +34,7 @@ module process1
 	// sent counter
 
 	// pick value
-	[async_pick1] (s1=0) -> 0.5 : (s1'=1) & (p1'=0) + 0.5 : (s1'=1) & (p1'=1);
+	[async_pick_process1] (s1=0) -> 0.5 : (s1'=1) & (p1'=0) + 0.5 : (s1'=1) & (p1'=1);
 
 	// send preference
 	[p12] (s1=1) & (sent1=0) -> (sent1'=1);
@@ -80,8 +80,10 @@ endmodule
 //----------------------------------------------------------------------------------------------------------------------------
 
 // construct further stations through renaming
-module process2=process1[s1=s2,p1=p2,c1=c2,sent1=sent2,receive1=receive2,async_pick1=async_pick2,p12=p23,p31=p12,c12=c23,c31=c12,p3=p1,c3=c1] endmodule
-module process3=process1[s1=s3,p1=p3,c1=c3,sent1=sent3,receive1=receive3,async_pick1=async_pick3,p12=p31,p31=p23,c12=c31,c31=c23,p3=p2,c3=c2] endmodule
+module process2=process1[s1=s2,p1=p2,c1=c2,sent1=sent2,receive1=receive2,p12=p23,p31=p12,c12=c23,c31=c12,p3=p1,c3=c1,
+                         async_pick_process1=async_pick_process2] endmodule
+module process3=process1[s1=s3,p1=p3,c1=c3,sent1=sent3,receive1=receive3,p12=p31,p31=p23,c12=c31,c31=c23,p3=p2,c3=c2,
+                         async_pick_process1=async_pick_process3] endmodule
 
 //----------------------------------------------------------------------------------------------------------------------------
 
