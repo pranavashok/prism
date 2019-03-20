@@ -1,0 +1,4 @@
+// liveness
+Pmax=? [ F ((s1=8) & (s2=7)) | ((s1=7) & (s2=8)) ]
+// noone ever makes P>=1 but when Pmax is provided, suddenly all have value 1.0 ...
+P>=1 [ F ((s1=8) & (s2=7)) | ((s1=7) & (s2=8)) ]
