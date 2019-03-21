@@ -49,7 +49,7 @@ def parse_output(output):
 
 # MODEL
 TYPE = ['abst', 'impl']
-D = ['01', '05', '10', '20', '50'] # // wire delay
+D = ['01', '02', '05', '10', '20', '50'] # // wire delay
 F = [0.5] # 0.9999, 0.0001 // probability of choosing fast
 # SPEC
 P = [1] # 1
@@ -77,7 +77,7 @@ def run_all():
     for di in D:
 
       if ((typei == 'abst' and int(di) < 10) or
-          (typei == 'impl' and int(di) > 10)):
+          (typei == 'impl' and int(di) >= 10)):
         continue
 
       for fi in F:
